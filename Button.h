@@ -34,10 +34,7 @@ class Button {
     void pulldown();
 
     void read();
-
     void setHoldThreshold(unsigned int holdTime);
-    bool held(unsigned int time=0);
-    bool heldFor(unsigned int time);
 
     void pressHandler(buttonEventHandler handler);
     void releaseHandler(buttonEventHandler handler);

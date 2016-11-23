@@ -20,6 +20,7 @@ Button::Button(uint8_t buttonPin, uint8_t buttonMode){
 
   numberOfPresses = 0;
   triggeredHoldEvent = true;
+  holdEventThreshold = 1000;
 
   lastButtonState = HIGH;
   lastDebounceTime = 0;
@@ -69,12 +70,28 @@ void Button::read(void)
   if (bitRead(state,CHANGED)) {
     if (bitRead(state,CURRENT)) {
       if (cb_onPress) { cb_onPress(*this); }
+      pressedStartTime = millis();
+      triggeredHoldEvent = false;
     }
     else {
       if (cb_onRelease) { cb_onRelease(*this); }
-      if (cb_onClick) { cb_onClick(*this); }
+
+      if (!triggeredHoldEvent) {
+        if (cb_onClick) { cb_onClick(*this); }
+      }
 
       pressedStartTime = -1;
+    }
+  }
+  else {
+    if (bitRead(state, CURRENT)) {
+      if (pressedStartTime != -1) {
+        if (millis()-pressedStartTime > holdEventThreshold) {
+          if (cb_onHold) { cb_onHold(*this); }
+          triggeredHoldEvent = true;
+          pressedStartTime = millis();
+        }
+      }
     }
   }
 
